@@ -5,7 +5,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 import random
-
+from IPython.display import clear_output
 
 
 
@@ -129,10 +129,11 @@ if __name__ == "__main__":
     
     # initialize gym env and agent
     env = gym.make("CartPole-v1")
+
     agent = DQLAgent(env)
     
     batch_size = 16
-    episodes = 100
+    episodes = 2
     for e in range(episodes):
         
         # initialize environment
@@ -167,34 +168,35 @@ if __name__ == "__main__":
             if done:
                 print("Episode: {}, time: {}".format(e,time))
                 break
-
+            
+            
 # %% test
 import time
 trained_model = agent
 state = env.reset()
 state = np.reshape(state, [1,4])
-time_t = 0
+step = 0
+t_reward=0
+
 while True:
-    env.render()
     action = trained_model.act(state)
     next_state, reward, done, _ = env.step(action)
+    t_reward=t_reward+reward
     next_state = np.reshape(next_state, [1,4])
     state = next_state
-    time_t += 1
-    print(time_t)
+    step += 1
+    
+    print("Step: {},Total Reward: {}".format(step,t_reward))
     #time.sleep(0.4)
     if done:
         break
 print("Done")
             
             
-            
-            
-            
-            
-            
-            
-            
+
+
+    
+
             
             
             
