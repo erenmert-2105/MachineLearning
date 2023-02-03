@@ -1,0 +1,10 @@
+The estimate for the memory requirements of a reinforcement learning task being a few hundred 
+megabytes to a couple of gigabytes is a rough estimate based on typical memory requirements for training neural networks.
+
+Calculate required memory (just idea not exact)
+
+If you have 100,000 parameters in your neural network, and you are using a batch size of 32, the memory 
+required to store the activations during a forward pass would be 32 * 100,000 * 4 bytes/parameter = 12.8 GB (assuming 32-bit floating-point data type).
+
+The memory required to store the gradients during a backward pass would be similarly calculated,
+and the total memory requirements for a forward and backward pass would be around 25.6 GB.
