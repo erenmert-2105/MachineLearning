@@ -1,4 +1,4 @@
-#%%
+#%% Lib
 import gym
 import numpy as np
 from collections import deque
@@ -10,6 +10,7 @@ from IPython.display import clear_output
 import tensorflow as tf
 import time
 import psutil
+import pickle
 
 # Configure TensorFlow to use GPU
 physical_devices = tf.config.experimental.list_physical_devices('GPU')
@@ -19,14 +20,14 @@ if len(physical_devices) > 0:
 else:
     print("No GPU found")
 
-        
+#%%   DeepRf      
 class DeepRf:
     
-    def __init__(self,env,gamma,learning_rate,epsilon):
+    def __init__(self,env,gamma,learning_rate,epsilon,model=0,buffer=0):
        # parameter / hyperparameter
        self.state_size = env.observation_space.shape[0]
        self.action_size = env.action_space.n
-       #%%
+
        """
        self.gama: This is the discount factor (gamma), which determines the
        importance of future rewards in the Q-Learning algorithm. It is a value 
@@ -52,7 +53,6 @@ class DeepRf:
        This sets a lower bound on the exploration rate and ensures that the
        agent will never fully stop exploring its environment.
        """
-       #%%
        self.gamma = gamma
        self.learning_rate = learning_rate
        
@@ -60,48 +60,30 @@ class DeepRf:
        self.epsilon_decay = 0.995
        self.epsilon_min = 0.01
        
-       self.memory = deque(maxlen = 1000)
-       
-       self.model = self.build_model()
+       if buffer ==0:
+           self.memory = deque(maxlen = 1000)
+       else:
+           self.memory=buffer
+           
+       if model ==0:
+           self.model = self.build_model()
+       else:
+           self.model=model
         
-        
+      
     def build_model(self):
-        #%%
-        """
-        Sigmoid: This activation function maps any input to a value 
-        between 0 and 1, making it useful for binary classification problems.
-        However, the sigmoid activation function can cause the vanishing 
-        gradient problem, where the gradients become very small, making
-        it difficult to train deep networks.
-        Tanh: The tanh activation function maps any input to a value
-        between -1 and 1. It is similar to the sigmoid function, but 
-        the outputs are centered around 0, which can help the model
-        converge faster.
-        
-        ReLU (Rectified Linear Unit): This activation function is widely 
-        used in deep learning because of its simplicity and efficiency. 
-        The ReLU activation function returns the input if it is positive,
-        and 0 otherwise. This allows the network to learn sparse 
-        representations, as only a subset of neurons will be activated
-        in each layer.
-        
-        Leaky ReLU: This is a variant of the ReLU activation function 
-        that returns a small negative value (e.g. 0.01) for negative 
-        inputs instead of 0. This helps prevent the "dying ReLU" problem,
-        where some neurons never activate and become stuck at 0.
-        
-        Softmax: This activation function is commonly used in the output 
-        layer of a deep learning model for multiclass classification problems. 
-        It maps the inputs to a probability distribution over the classes, 
-        allowing the model to output a predicted class.
-        """
-        #%%
+
+
+
         # neural network for deep q learning
         model = Sequential()
         model.add(Dense(48, input_dim = self.state_size, activation = "tanh"))
         model.add(Dense(self.action_size,activation = "linear"))
         model.compile(loss = "mse", optimizer = Adam(lr = self.learning_rate))
         return model
+
+        
+            
     
     def remember(self, state, action, reward, next_state, done):
         # storage
@@ -127,13 +109,13 @@ class DeepRf:
                 target = reward + self.gamma*np.amax(self.model.predict(next_state)[0])
             train_target = self.model.predict(state)
             train_target[0][action] = target
-            self.model.fit(state,train_target, verbose = 0)
+            self.model.fit(state,train_target, verbose = 0,use_multiprocessing=True)
             
     def adaptiveEGreedy(self):
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
-test=0
-save=0
+#%%   Load value         
+load=0
 
 def get_ram_usage():
     return psutil.virtual_memory().percent
@@ -142,21 +124,26 @@ if __name__ == "__main__":
     
     # initialize gym env and agent
     env = gym.make("CartPole-v1")
-#%%    
+#%%    Run
     gamma = 0.95 
     # reward importance
     learning_rate = 0.001
     # high learning rate results in quick but unstable convergence, while a low learning rate may produce slow but stable convergence
     epsilon = 1 
     # explore rate do not change that its changing over time in algo
-    batch_size = 32
+    batch_size = 16
     # it is how many steps between backward and forward 
     # it effect result dramaticly low batch_size makes more accure and high makes more experiance so learns faster but too high or low makes learning harder
     
-    episodes = 20
+    episodes = 50
     # how many times play after done 
-    
-    agent = DeepRf(env,gamma,learning_rate,epsilon)
+    if load==1:
+        model = tf.keras.models.load_model("DRFmodel.h5")
+        buffer = pickle.load(open('buffer.pkl', 'rb'))
+        
+        agent = DeepRf(env,gamma,learning_rate,epsilon,model=model,buffer=buffer)
+    else:
+        agent = DeepRf(env,gamma,learning_rate,epsilon)
 # high batch size means more experiance and it effects dramaticly on the other hand when you train it with low batch size your system more stable
     for e in range(episodes):
         
@@ -167,7 +154,9 @@ if __name__ == "__main__":
         
         time = 0
         if get_ram_usage() >= 90:
-            agent.save("DRFmodel.h5")
+            agent.model.save("DRFmodel.h5")
+            pickle.dump(agent.memory, open('buffer.pkl', 'wb')) 
+            
             break
         else: 
             while True:
@@ -198,8 +187,8 @@ if __name__ == "__main__":
                 
                  
                 
-     # %% test
-if test==1:   
+# %% test
+"""
    
    trained_model = agent
    state = env.reset()
@@ -219,11 +208,16 @@ if test==1:
        if done:
            break
    print("Done")
-                
-if save == 1:
-    agent.save("DRFmodel.h5")                               
-                    
 """
-agent = tf.keras.models.load_model("DRFmodel.h5")
+#%%  save              
+"""
+    agent.model.save("DRFmodel.h5")
+    pickle.dump(agent.memory, open('buffer.pkl', 'wb'))                             
+"""
+
+#%%load                        
+"""
+model = tf.keras.models.load_model("DRFmodel.h5")
+buffer = pickle.load(open('buffer.pkl', 'rb'))
 """                
                 
