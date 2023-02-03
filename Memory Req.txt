@@ -1,3 +1,4 @@
+
 Calculate required memory (just idea not exact)
 
 If you have 100,000 parameters in your neural network, and you are using a batch size of 32, the memory 
@@ -5,3 +6,76 @@ required to store the activations during a forward pass would be 32 * 100,000 * 
 
 The memory required to store the gradients during a backward pass would be similarly calculated,
 and the total memory requirements for a forward and backward pass would be around 25.6 GB.
+
+note1:
+ the range of values for "float32" is approximately (-3.4 x 10^38 to +3.4 x 10^38),
+ and the range of values for "float64" is approximately (-1.8 x 10^308 to +1.8 x 10^308).
+ 
+ here is python code for that
+ 
+ 
+import numpy as np
+
+float_array = np.array([1.0, 2.5, 3.14], dtype=np.float32)
+
+note2:
+here is code that set your array to min unit vektor that your data needs
+
+import numpy as np
+
+# Create a numpy array with the data
+data = [0.00006103515, 0.00009, 0.0001, 0.0002]
+
+# Find the maximum absolute value in the data
+max_val = max(abs(min(data)), abs(max(data)))
+
+# Determine the smallest data type that can represent the maximum absolute value with a relative error of 1E-7
+if max_val < np.finfo(np.float16).tiny:
+    dtype = np.float16
+elif max_val < np.finfo(np.float32).tiny:
+    dtype = np.float32
+else:
+    dtype = np.float64
+
+# Create the numpy array with the determined data type
+min_unit_vector_array = np.array(data, dtype=dtype)
+
+note3:
+for float16
+minimum negative normal value  -65504
+maximum negative normal value -2^(-14)
+
+
+note2: 
+1 bit: 0 or 1
+2 bits: 0 to 3 
+3 bits: 0 to 7 
+4 bits: 0 to 15 
+5 bits: 0 to 31 
+6 bits: 0 to 63 
+7 bits: 0 to 127 
+8 bits: 0 to 255 
+9 bits: 0 to 511 
+10 bits: 0 to 1023 
+11 bits: 0 to 2047 
+12 bits: 0 to 4095 
+13 bits: 0 to 8191 
+14 bits: 0 to 16,383 
+15 bits: 0 to 32,767 
+16 bits: 0 to 65,535 
+17 bits: 0 to 131,071 
+18 bits: 0 to 262,143 
+19 bits: 0 to 524,287 
+20 bits: 0 to 1,048,575 
+21 bits: 0 to 2,097,151 
+22 bits: 0 to 4,194,303 
+23 bits: 0 to 8,388,607 
+24 bits: 0 to 16,777,215 
+25 bits: 0 to 33,554,431 
+26 bits: 0 to 67,108,863 
+27 bits: 0 to 134,217,727 
+28 bits: 0 to 268,435,455 
+29 bits: 0 to 536,870,911 
+30 bits: 0 to 1,073,741,823 
+31 bits: 0 to 2,147,483,647 
+32 bits: 0 to 4,294,967,295 
