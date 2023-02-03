@@ -6,12 +6,44 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 import random
 
+
+
+
+        
 class DQLAgent:
     def __init__(self, env):
         # parameter / hyperparameter
         self.state_size = env.observation_space.shape[0]
         self.action_size = env.action_space.n
+        #%%
+        """
+        self.gama: This is the discount factor (gamma), which determines the
+        importance of future rewards in the Q-Learning algorithm. It is a value 
+        between 0 and 1, with a higher value indicating that future rewards are 
+        more important.
+
+        self.leraning_rate: This is the learning rate, which determines the 
+        size of the update step taken at each iteration of the Q-Learning 
+        algorithm. A smaller learning rate may result in slower convergence, 
+        while a larger learning rate may cause overshooting or instability.
         
+        self.epsilon: This is the exploration rate or epsilon,
+        which determines the probability of the agent taking a random 
+        action instead of following the action with the highest Q-value.
+        A higher value of epsilon means that the agent is more likely 
+        to explore its environment, while a lower value means it is more 
+        likely to exploit what it already knows.
+        
+        self.epsilon_decay: This is the rate at which the value of
+        epsilon is decreased over time. This allows the agent to gradually 
+        reduce its exploration and increase its exploitation as it gains more
+        information about the environment.
+
+        self.epsilon_min: This is the minimum value that epsilon can take.
+        This sets a lower bound on the exploration rate and ensures that the
+        agent will never fully stop exploring its environment.
+        """
+        #%%
         self.gamma = 0.95
         self.learning_rate = 0.001 
         
@@ -25,6 +57,37 @@ class DQLAgent:
         
         
     def build_model(self):
+        #%%
+        """
+        Sigmoid: This activation function maps any input to a value 
+        between 0 and 1, making it useful for binary classification problems.
+        However, the sigmoid activation function can cause the vanishing 
+        gradient problem, where the gradients become very small, making
+        it difficult to train deep networks.
+
+        Tanh: The tanh activation function maps any input to a value
+        between -1 and 1. It is similar to the sigmoid function, but 
+        the outputs are centered around 0, which can help the model
+        converge faster.
+        
+        ReLU (Rectified Linear Unit): This activation function is widely 
+        used in deep learning because of its simplicity and efficiency. 
+        The ReLU activation function returns the input if it is positive,
+        and 0 otherwise. This allows the network to learn sparse 
+        representations, as only a subset of neurons will be activated
+        in each layer.
+        
+        Leaky ReLU: This is a variant of the ReLU activation function 
+        that returns a small negative value (e.g. 0.01) for negative 
+        inputs instead of 0. This helps prevent the "dying ReLU" problem,
+        where some neurons never activate and become stuck at 0.
+        
+        Softmax: This activation function is commonly used in the output 
+        layer of a deep learning model for multiclass classification problems. 
+        It maps the inputs to a probability distribution over the classes, 
+        allowing the model to output a predicted class.
+        """
+        #%%
         # neural network for deep q learning
         model = Sequential()
         model.add(Dense(48, input_dim = self.state_size, activation = "tanh"))
@@ -65,7 +128,7 @@ class DQLAgent:
 if __name__ == "__main__":
     
     # initialize gym env and agent
-    env = gym.make("CartPole-v0")
+    env = gym.make("CartPole-v1")
     agent = DQLAgent(env)
     
     batch_size = 16
@@ -123,3 +186,25 @@ while True:
     if done:
         break
 print("Done")
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+    
