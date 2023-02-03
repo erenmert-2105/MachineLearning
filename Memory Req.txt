@@ -1,4 +1,3 @@
-
 Calculate required memory (just idea not exact)
 
 If you have 100,000 parameters in your neural network, and you are using a batch size of 32, the memory 
@@ -7,46 +6,11 @@ required to store the activations during a forward pass would be 32 * 100,000 * 
 The memory required to store the gradients during a backward pass would be similarly calculated,
 and the total memory requirements for a forward and backward pass would be around 25.6 GB.
 
+
 note1:
- the range of values for "float32" is approximately (-3.4 x 10^38 to +3.4 x 10^38),
- and the range of values for "float64" is approximately (-1.8 x 10^308 to +1.8 x 10^308).
- 
- here is python code for that
- 
- 
-import numpy as np
-
-float_array = np.array([1.0, 2.5, 3.14], dtype=np.float32)
-
-note2:
-here is code that set your array to min unit vektor that your data needs
-
-import numpy as np
-
-# Create a numpy array with the data
-data = [0.00006103515, 0.00009, 0.0001, 0.0002]
-
-# Find the maximum absolute value in the data
-max_val = max(abs(min(data)), abs(max(data)))
-
-# Determine the smallest data type that can represent the maximum absolute value with a relative error of 1E-7
-if max_val < np.finfo(np.float16).tiny:
-    dtype = np.float16
-elif max_val < np.finfo(np.float32).tiny:
-    dtype = np.float32
-else:
-    dtype = np.float64
-
-# Create the numpy array with the determined data type
-min_unit_vector_array = np.array(data, dtype=dtype)
-
-note3:
-for float16
-minimum negative normal value  -65504
-maximum negative normal value -2^(-14)
 
 
-note2: 
+
 1 bit: 0 or 1
 2 bits: 0 to 3 
 3 bits: 0 to 7 
@@ -79,3 +43,81 @@ note2:
 30 bits: 0 to 1,073,741,823 
 31 bits: 0 to 2,147,483,647 
 32 bits: 0 to 4,294,967,295 
+
+
+note2:
+
+
+
+
+ the range of values for "float32" is approximately (-3.4 x 10^38 to +3.4 x 10^38),
+ and the range of values for "float64" is approximately (-1.8 x 10^308 to +1.8 x 10^308).
+ 
+ here is python code for that
+ 
+ 
+import numpy as np
+
+float_array = np.array([1.0, 2.5, 3.14], dtype=np.float32)
+
+
+note3:
+
+
+
+The smallest floating point data type in NumPy is float16, which uses 16 bits of memory to 
+represent a floating point number. The other available floating point data types in NumPy are float32 (32 bits) and float64 (64 bits).
+
+If you need to represent numbers with fewer bits, you may consider using integer data types instead, such as int8, int16, int32, or 
+int64. However, these data types do not represent floating point numbers and may not meet the requirements of your application.
+
+
+note4:
+
+
+The smallest floating point data type in NumPy is float16, which uses 16 bits of memory to represent a floating point number. The other 
+available floating point data types in NumPy are float32 (32 bits) and float64 (64 bits).
+
+If you need to represent numbers with fewer bits, you may consider using integer data types instead, such as int8, int16, int32, or int64.
+ However, these data types do not represent floating point numbers and may not meet the requirements of your application.
+
+
+note5:
+
+
+
+# Create a numpy array with the data
+data = [2, 3, 4, 5]
+
+# Find the maximum absolute value in the data
+max_val = max(abs(min(data)), abs(max(data)))
+
+# Determine the smallest data type that can represent the maximum absolute value
+if max_val <= np.iinfo(np.int8).max:
+    dtype = np.int8
+elif max_val <= np.iinfo(np.int16).max:
+    dtype = np.int16
+elif max_val <= np.iinfo(np.int32).max:
+    dtype = np.int32
+else:
+    dtype = np.int64
+
+# Create the numpy array with the determined data type
+int_array = np.array(data, dtype=dtype)
+
+# Create a numpy array with the data
+data = [0.00006103515, 0.00009, 0.0001, 0.0002]
+
+# Find the maximum absolute value in the data
+max_val = max(abs(min(data)), abs(max(data)))
+
+# Determine the smallest data type that can represent the maximum absolute value with a relative error of 1E-7
+if max_val < np.finfo(np.float16).tiny:
+    dtype = np.float16
+elif max_val < np.finfo(np.float32).tiny:
+    dtype = np.float32
+else:
+    dtype = np.float64
+
+# Create the numpy array with the determined data type
+min_unit_vector_array = np.array(data, dtype=dtype)
