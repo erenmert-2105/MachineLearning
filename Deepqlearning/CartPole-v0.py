@@ -8,6 +8,7 @@ from keras.optimizers import Adam
 import random
 from IPython.display import clear_output
 import tensorflow as tf
+
 import time
 import psutil
 import pickle
@@ -61,7 +62,7 @@ class DeepRf:
        self.epsilon_decay = 0.995
        self.epsilon_min = 0.01
        
-       self.memory = deque(maxlen = 1000)
+       self.memory = deque(maxlen = 10000)
 
        self.model = self.build_model()
 
@@ -128,7 +129,7 @@ if __name__ == "__main__":
     # high learning rate results in quick but unstable convergence, while a low learning rate may produce slow but stable convergence
     epsilon = 1 
     # explore rate do not change that its changing over time in algo
-    batch_size = 16
+    batch_size = 4
     # it is how many steps between backward and forward 
     # it effect result dramaticly low batch_size makes more accure and high makes more experiance so learns faster but too high or low makes learning harder
     
@@ -144,7 +145,7 @@ if __name__ == "__main__":
         agent.model=model
         agent.memory=memory
         
-        
+    scores=np.array([])    
     for e in range(episodes):
         
         # initialize environment
@@ -183,6 +184,7 @@ if __name__ == "__main__":
                 time += 1
                 if done:
                     print("Episode: {}, time: {}".format(e,time))
+                    scores=np.append(scores,time)
                     break
                 
                  
