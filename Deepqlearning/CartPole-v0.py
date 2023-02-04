@@ -10,17 +10,11 @@ from IPython.display import clear_output
 import tensorflow as tf
 
 import time
+import dill
 import psutil
 import pickle
 import gc
 
-# Configure TensorFlow to use GPU
-physical_devices = tf.config.experimental.list_physical_devices('GPU')
-if len(physical_devices) > 0:
-    tf.config.experimental.set_memory_growth(physical_devices[0], True)
-    tf.config.experimental.set_visible_devices(physical_devices[0], 'GPU')
-else:
-    print("No GPU found")
 
 #%%   DeepRf      
 class DeepRf:
@@ -62,7 +56,7 @@ class DeepRf:
        self.epsilon_decay = 0.995
        self.epsilon_min = 0.01
        
-       self.memory = deque(maxlen = 10000)
+       self.memory = deque(maxlen = 1000)
 
        self.model = self.build_model()
 
@@ -125,23 +119,24 @@ if __name__ == "__main__":
 #%%    Run
     gamma = 0.95 
     # reward importance
-    learning_rate = 0.1
+    learning_rate = 0.001
     # high learning rate results in quick but unstable convergence, while a low learning rate may produce slow but stable convergence
     epsilon = 1 
     # explore rate do not change that its changing over time in algo
-    batch_size = 4
+    batch_size = 10
     # it is how many steps between backward and forward 
     # it effect result dramaticly low batch_size makes more accure and high makes more experiance so learns faster but too high or low makes learning harder
     
     episodes = 50
     # how many times play after done 
 
-
+    
+    
     agent = DeepRf(env,gamma,learning_rate,epsilon)
     
     if load ==1:
         model = tf.keras.models.load_model("DRFmodel.h5")
-        memory = pickle.load(open('buffer.pkl', 'rb'))
+        memory = dill.load(open('buffer.dill', 'rb'))
         agent.model=model
         agent.memory=memory
         
@@ -154,10 +149,10 @@ if __name__ == "__main__":
         state = np.reshape(state,[1,4])
         
         time = 0
-        if get_ram_usage() >= 90:
-            agent.model.save("DRFmodel.h5")
-            pickle.dump(agent.memory, open('memory.pkl', 'wb')) 
-            
+        if get_ram_usage() >= 95:
+            tf.keras.models.save_model(agent.model, "DRFmodel.h5")
+            dill.dump(agent.memory, open('buffer.dill', 'wb'))
+        
             break
         else: 
             while True:
@@ -193,6 +188,7 @@ if __name__ == "__main__":
 """
    
    trained_model = agent
+   trained_model.epsilon=0
    state = env.reset()
    state = np.reshape(state, [1,4])
    step = 0
@@ -211,14 +207,15 @@ if __name__ == "__main__":
            break
    print("Done")
 """
-#%%  save              
-"""
-    agent.model.save("DRFmodel.h5")
-    pickle.dump(agent.memory, open('buffer.pkl', 'wb'))                             
-"""
+#%%  save      
+"""        
+tf.keras.models.save_model(agent.model, "DRFmodel.h5")
+dill.dump(agent.memory, open('buffer.dill', 'wb'))
 
+
+"""
 #%%load                        
 """
 model = tf.keras.models.load_model("DRFmodel.h5")
-memory = pickle.load(open('memory.pkl', 'rb'))
+memory = dill.load(open('buffer.dill', 'rb'))
 """                
