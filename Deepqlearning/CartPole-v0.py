@@ -23,7 +23,7 @@ else:
 #%%   DeepRf      
 class DeepRf:
     
-    def __init__(self,env,gamma,learning_rate,epsilon,model=0,buffer=0):
+    def __init__(self,env,gamma,learning_rate,epsilon):
        # parameter / hyperparameter
        self.state_size = env.observation_space.shape[0]
        self.action_size = env.action_space.n
@@ -60,15 +60,10 @@ class DeepRf:
        self.epsilon_decay = 0.995
        self.epsilon_min = 0.01
        
-       if buffer ==0:
-           self.memory = deque(maxlen = 1000)
-       else:
-           self.memory=buffer
-           
-       if model ==0:
-           self.model = self.build_model()
-       else:
-           self.model=model
+       self.memory = deque(maxlen = 1000)
+
+       self.model = self.build_model()
+
         
       
     def build_model(self):
@@ -127,7 +122,7 @@ if __name__ == "__main__":
 #%%    Run
     gamma = 0.95 
     # reward importance
-    learning_rate = 0.001
+    learning_rate = 0.1
     # high learning rate results in quick but unstable convergence, while a low learning rate may produce slow but stable convergence
     epsilon = 1 
     # explore rate do not change that its changing over time in algo
@@ -137,14 +132,17 @@ if __name__ == "__main__":
     
     episodes = 50
     # how many times play after done 
-    if load==1:
+
+
+    agent = DeepRf(env,gamma,learning_rate,epsilon)
+    
+    if load ==1:
         model = tf.keras.models.load_model("DRFmodel.h5")
-        buffer = pickle.load(open('buffer.pkl', 'rb'))
+        memory = pickle.load(open('buffer.pkl', 'rb'))
+        agent.model=model
+        agent.memory=memory
         
-        agent = DeepRf(env,gamma,learning_rate,epsilon,model=model,buffer=buffer)
-    else:
-        agent = DeepRf(env,gamma,learning_rate,epsilon)
-# high batch size means more experiance and it effects dramaticly on the other hand when you train it with low batch size your system more stable
+        
     for e in range(episodes):
         
         # initialize environment
@@ -155,7 +153,7 @@ if __name__ == "__main__":
         time = 0
         if get_ram_usage() >= 90:
             agent.model.save("DRFmodel.h5")
-            pickle.dump(agent.memory, open('buffer.pkl', 'wb')) 
+            pickle.dump(agent.memory, open('memory.pkl', 'wb')) 
             
             break
         else: 
@@ -218,6 +216,5 @@ if __name__ == "__main__":
 #%%load                        
 """
 model = tf.keras.models.load_model("DRFmodel.h5")
-buffer = pickle.load(open('buffer.pkl', 'rb'))
+memory = pickle.load(open('memory.pkl', 'rb'))
 """                
-                
