@@ -11,6 +11,7 @@ import tensorflow as tf
 import time
 import psutil
 import pickle
+import gc
 
 # Configure TensorFlow to use GPU
 physical_devices = tf.config.experimental.list_physical_devices('GPU')
@@ -105,6 +106,7 @@ class DeepRf:
             train_target = self.model.predict(state)
             train_target[0][action] = target
             self.model.fit(state,train_target, verbose = 0,use_multiprocessing=True)
+        gc.collect()
             
     def adaptiveEGreedy(self):
         if self.epsilon > self.epsilon_min:
