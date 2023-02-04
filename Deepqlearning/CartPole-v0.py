@@ -13,6 +13,7 @@ import time
 import dill
 import psutil
 import pickle
+import pyglet
 import gc
 
 
@@ -127,7 +128,7 @@ if __name__ == "__main__":
     # it is how many steps between backward and forward 
     # it effect result dramaticly low batch_size makes more accure and high makes more experiance so learns faster but too high or low makes learning harder
     
-    episodes = 50
+    episodes = 2
     # how many times play after done 
 
     
@@ -141,7 +142,7 @@ if __name__ == "__main__":
         agent.memory=memory
         
     scores=np.array([])    
-    for e in range(episodes):
+    for e in range(episodes+1):
         
         # initialize environment
         state = env.reset()
