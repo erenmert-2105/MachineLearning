@@ -20,7 +20,7 @@ import gc
 #%%   DeepRf      
 class DeepRf:
     
-    def __init__(self,env,gamma,learning_rate,epsilon):
+    def __init__(self,env,gamma,learning_rate,epsilon,test=0):
        # parameter / hyperparameter
        self.state_size = env.observation_space.shape[0]
        self.action_size = env.action_space.n
@@ -57,9 +57,11 @@ class DeepRf:
        self.epsilon_decay = 0.995
        self.epsilon_min = 0.01
        
-       self.memory = deque(maxlen = 1000)
+       self.memory = deque(maxlen = 10000)
 
        self.model = self.build_model()
+       
+       self.test=test
 
         
       
@@ -82,12 +84,23 @@ class DeepRf:
         self.memory.append((state, action, reward, next_state, done))
     
     def act(self, state):
-        # acting: explore or exploit
-        if random.uniform(0,1) <= self.epsilon:
-            return env.action_space.sample()
-        else:
-            act_values = self.model.predict(state)
-            return np.argmax(act_values[0])
+        if self.test==0:
+            
+            # acting: explore or exploit
+            if random.uniform(0,1) <= self.epsilon:
+                return env.action_space.sample()
+            else:
+                act_values = self.model.predict(state)
+                return np.argmax(act_values[0])
+        elif self.test ==1:
+                if random.uniform(0,1) <= 0.01:
+                    return env.action_space.sample()
+                else:
+                    act_values = self.model.predict(state)
+                    return np.argmax(act_values[0])
+                act_values = self.model.predict(state)
+                return np.argmax(act_values[0])
+        
     
     def replay(self, batch_size):
         # training
@@ -120,15 +133,15 @@ if __name__ == "__main__":
 #%%    Run
     gamma = 0.95 
     # reward importance
-    learning_rate = 0.001
+    learning_rate = 0.1
     # high learning rate results in quick but unstable convergence, while a low learning rate may produce slow but stable convergence
     epsilon = 1 
     # explore rate do not change that its changing over time in algo
-    batch_size = 10
+    batch_size = 4
     # it is how many steps between backward and forward 
     # it effect result dramaticly low batch_size makes more accure and high makes more experiance so learns faster but too high or low makes learning harder
     
-    episodes = 2
+    episodes = 30
     # how many times play after done 
 
     
@@ -186,10 +199,12 @@ if __name__ == "__main__":
                  
                 
 # %% test
+
+#list(trained_model.memory)
 """
    
    trained_model = agent
-   trained_model.epsilon=0
+   trained_model.test=1
    state = env.reset()
    state = np.reshape(state, [1,4])
    step = 0
